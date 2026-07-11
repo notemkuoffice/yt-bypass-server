@@ -1,4 +1,5 @@
-﻿import os
+import shutil
+import os
 import asyncio
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
@@ -17,15 +18,28 @@ app.add_middleware(
 )
 
 def get_direct_url(youtube_url: str):
+    # Путь к загруженному файлу кук в корне проекта
+    repo_cookie_path = "cookies.txt"
+    # Разрешенный путь для записи в RAM-директории Vercel
+    tmp_cookie_path = "/tmp/cookies.txt"
+    
+    # Переносим файл в область с правами на запись, если он существует
+    if os.path.exists(repo_cookie_path):
+        shutil.copyfile(repo_cookie_path, tmp_cookie_path)
+            
     ydl_opts = {
         'format': 'best[ext=mp4][vcodec!=none][acodec!=none]/best',
         'nocheckcertificate': True,
-        'quiet': True,
-        'cookiefile': 'cookies.txt' 
+        'quiet': True
     }
+    
+    if os.path.exists(tmp_cookie_path):
+        ydl_opts['cookiefile'] = tmp_cookie_path  # Используем путь из /tmp
+        
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         info = ydl.extract_info(youtube_url, download=False)
         return info.get('url'), info.get('title', 'Video')
+
 
 @app.get("/api/video-info")
 async def video_info(url: str = Query(..., description="YouTube URL")):
