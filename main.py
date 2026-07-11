@@ -18,26 +18,30 @@ app.add_middleware(
 )
 
 def get_direct_url(youtube_url: str):
-    repo_cookie_path = "cookies.txt"
-    tmp_cookie_path = "/tmp/cookies.txt"
+    # Разрешенный путь для записи в RAM-директории Vercel
+    tmp_cookie_path = "/tmp/vercel_cookies.txt"
     
-    if os.path.exists(repo_cookie_path):
-        shutil.copyfile(repo_cookie_path, tmp_cookie_path)
+    # Достаем текст кук из сохраненных нами настроек Vercel
+    raw_cookies = os.environ.get("YT_COOKIES", "")
+    
+    # Создаем файл кук в памяти контейнера перед каждым запросом ТСД
+    if raw_cookies:
+        with open(tmp_cookie_path, "w", encoding="utf-8") as f:
+            f.write(raw_cookies)
             
     ydl_opts = {
-        # Максимально широкий формат для гарантированного обхода ошибки "Requested format is not available"
         'format': 'b',
         'nocheckcertificate': True,
         'quiet': True
     }
     
-    if os.path.exists(tmp_cookie_path):
+    # Если переменная успешно развернулась, скармливаем её yt_dlp
+    if os.path.exists(tmp_cookie_path) and os.path.getsize(tmp_cookie_path) > 0:
         ydl_opts['cookiefile'] = tmp_cookie_path
         
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         info = ydl.extract_info(youtube_url, download=False)
         return info.get('url'), info.get('title', 'Video')
-
     
     if os.path.exists(tmp_cookie_path):
         ydl_opts['cookiefile'] = tmp_cookie_path  # Используем путь из /tmp
