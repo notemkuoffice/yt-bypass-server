@@ -20,7 +20,8 @@ def get_direct_url(youtube_url: str):
     ydl_opts = {
         'format': 'best[ext=mp4][vcodec!=none][acodec!=none]/best',
         'nocheckcertificate': True,
-        'quiet': True
+        'quiet': True,
+        'cookiefile': 'cookies.txt' 
     }
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         info = ydl.extract_info(youtube_url, download=False)
