@@ -25,8 +25,8 @@ def get_direct_url(youtube_url: str):
         shutil.copyfile(repo_cookie_path, tmp_cookie_path)
             
     ydl_opts = {
-        # ИСПРАВЛЕНО: Универсальный формат для гарантированного извлечения потока
-        'format': 'best[vcodec!=none][acodec!=none]/best',
+        # Максимально широкий формат для гарантированного обхода ошибки "Requested format is not available"
+        'format': 'b',
         'nocheckcertificate': True,
         'quiet': True
     }
