@@ -17,17 +17,23 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+import os
+import shutil
+import yt_dlp
+
 def get_direct_url(youtube_url: str):
-    # Разрешенный путь для записи в RAM-директории Vercel
-    tmp_cookie_path = "/tmp/vercel_cookies.txt"
+    # Берем загруженный нами на GitHub текстовый файл кук
+    repo_cookie_file = "youtube_session.txt"
+    # Путь в оперативной памяти Vercel (разрешен на запись)
+    tmp_cookie_path = "/tmp/active_session_cookies.txt"
     
-    # Достаем текст кук из сохраненных нами настроек Vercel
-    raw_cookies = os.environ.get("YT_COOKIES", "")
-    
-    # Создаем файл кук в памяти контейнера перед каждым запросом ТСД
-    if raw_cookies:
-        with open(tmp_cookie_path, "w", encoding="utf-8") as f:
-            f.write(raw_cookies)
+    # Принудительно копируем файл в RAM перед вызовом yt_dlp
+    if os.path.exists(repo_cookie_file):
+        try:
+            shutil.copyfile(repo_cookie_file, tmp_cookie_path)
+            os.chmod(tmp_cookie_path, 0o666)
+        except Exception as e:
+            print(f"Ошибка копирования кук: {e}")
             
     ydl_opts = {
         'format': 'b',
@@ -35,21 +41,13 @@ def get_direct_url(youtube_url: str):
         'quiet': True
     }
     
-    # Если переменная успешно развернулась, скармливаем её yt_dlp
+    # Скармливаем библиотеке путь из папки /tmp/
     if os.path.exists(tmp_cookie_path) and os.path.getsize(tmp_cookie_path) > 0:
         ydl_opts['cookiefile'] = tmp_cookie_path
         
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         info = ydl.extract_info(youtube_url, download=False)
         return info.get('url'), info.get('title', 'Video')
-    
-    if os.path.exists(tmp_cookie_path):
-        ydl_opts['cookiefile'] = tmp_cookie_path  # Используем путь из /tmp
-        
-    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-        info = ydl.extract_info(youtube_url, download=False)
-        return info.get('url'), info.get('title', 'Video')
-
 
 @app.get("/api/video-info")
 async def video_info(url: str = Query(..., description="YouTube URL")):
