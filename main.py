@@ -18,20 +18,26 @@ app.add_middleware(
 )
 
 def get_direct_url(youtube_url: str):
-    # Путь к загруженному файлу кук в корне проекта
     repo_cookie_path = "cookies.txt"
-    # Разрешенный путь для записи в RAM-директории Vercel
     tmp_cookie_path = "/tmp/cookies.txt"
     
-    # Переносим файл в область с правами на запись, если он существует
     if os.path.exists(repo_cookie_path):
         shutil.copyfile(repo_cookie_path, tmp_cookie_path)
             
     ydl_opts = {
-        'format': 'best[ext=mp4][vcodec!=none][acodec!=none]/best',
+        # ИСПРАВЛЕНО: Универсальный формат для гарантированного извлечения потока
+        'format': 'best[vcodec!=none][acodec!=none]/best',
         'nocheckcertificate': True,
         'quiet': True
     }
+    
+    if os.path.exists(tmp_cookie_path):
+        ydl_opts['cookiefile'] = tmp_cookie_path
+        
+    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+        info = ydl.extract_info(youtube_url, download=False)
+        return info.get('url'), info.get('title', 'Video')
+
     
     if os.path.exists(tmp_cookie_path):
         ydl_opts['cookiefile'] = tmp_cookie_path  # Используем путь из /tmp
