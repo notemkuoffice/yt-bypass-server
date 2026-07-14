@@ -1,4 +1,5 @@
 import os
+import io
 from fastapi import FastAPI, Query, HTTPException
 from fastapi.responses import StreamingResponse
 import httpx
@@ -7,20 +8,33 @@ import yt_dlp
 app = FastAPI()
 
 def get_direct_url(youtube_url: str):
-    cookie_path = "youtube_session.txt"
+    # Прямой массив строк из вашего файла youtube_session.txt
+    # (Мы упаковываем структуру Netscape HTTP Cookie прямо в код)
+    cookie_data = """# Netscape HTTP Cookie File
+.youtube.com\tTRUE\t/\tTRUE\t0\t__Secure-3PSID\tAI96-F0G... (ВАШ ТОКЕН ИЗ ФАЙЛА)
+.youtube.com\tTRUE\t/\tTRUE\t0\tLOGIN_INFO\t... (ВАШ ТОКЕН ИЗ ФАЙЛА)
+"""
+    # Если в коде пока оставим чтение файла, но добавим строгую очистку переносов строки:
+    repo_cookie_file = "youtube_session.txt"
+    tmp_cookie_path = "/tmp/clean_cookies.txt"
     
+    if os.path.exists(repo_cookie_file):
+        with open(repo_cookie_file, "r", encoding="utf-8") as rf:
+            content = rf.read()
+        # Очищаем от Windows-переносов \r\n, которые ломают парсер в Linux на Vercel
+        clean_content = content.replace("\r\n", "\n")
+        with open(tmp_cookie_path, "w", encoding="utf-8", newline="\n") as wf:
+            wf.write(clean_content)
+
     ydl_opts = {
         'format': 'b',
         'nocheckcertificate': True,
         'quiet': True,
+        'no_cookies_to_disk': True
     }
     
-    # Вместо копирования файлов мы заставляем yt-dlp читать данные через RAM-буфер
-    if os.path.exists(cookie_path):
-        ydl_opts['cookiefile'] = cookie_path
-        # Если yt-dlp капризничает из-за r/w прав на Netscape-файл, 
-        # принудительно запрещаем ему обновлять и перезаписывать куки на диске
-        ydl_opts['no_cookies_to_disk'] = True
+    if os.path.exists(tmp_cookie_path):
+        ydl_opts['cookiefile'] = tmp_cookie_path
 
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         info = ydl.extract_info(youtube_url, download=False)
