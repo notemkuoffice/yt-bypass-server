@@ -24,11 +24,12 @@ def get_direct_url(youtube_url: str):
         'nocheckcertificate': True,
         'verbose': True,
         'no_cookies_to_disk': True,
-        # ИСПРАВЛЕНО: используем сквозной эмбед-клиент, у которого отключен nsig
+        # Отключаем разбор DASH-манифестов, чтобы YouTube сразу отдавал цельные ссылки
+        'youtube_include_dash_manifest': False,
         'extractor_args': {
             'youtube': {
-                'player_client': ['web_embedded'],
-                'skip': ['webpage']
+                'player_client': ['web'],
+                'skip': ['configs']
             }
         }
     }
