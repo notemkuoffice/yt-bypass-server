@@ -27,11 +27,17 @@ def get_direct_url(youtube_url: str):
             wf.write(clean_content)
             
     ydl_opts = {
-        # ИСПРАВЛЕНО: переключаем на 'best', чтобы обойти ошибку шифрования nsig
         'format': 'best',
         'nocheckcertificate': True,
         'verbose': True,
-        'no_cookies_to_disk': True
+        'no_cookies_to_disk': True,
+        # ИСПРАВЛЕНО: Принудительно заставляем использовать клиенты без шифрования nsig
+        'extractor_args': {
+            'youtube': {
+                'player_client': ['android', 'ios'],
+                'skip': ['webpage', 'configs']
+            }
+        }
     }
 
     if os.path.exists(tmp_cookie_path):
