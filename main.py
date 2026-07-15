@@ -31,11 +31,11 @@ def get_direct_url(youtube_url: str):
         'nocheckcertificate': True,
         'verbose': True,
         'no_cookies_to_disk': True,
-        # ИСПРАВЛЕНО: Принудительно заставляем использовать клиенты без шифрования nsig
+        # ИСПРАВЛЕНО: используем SmartTV и мобильный веб, работающие без ограничений сигнатур
         'extractor_args': {
             'youtube': {
-                'player_client': ['android', 'ios'],
-                'skip': ['webpage', 'configs']
+                'player_client': ['tv', 'mweb'],
+                'skip': ['webpage']
             }
         }
     }
