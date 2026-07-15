@@ -23,11 +23,11 @@ def get_direct_url(youtube_url: str):
         'nocheckcertificate': True,
         'verbose': True,
         'no_cookies_to_disk': True,
-        # Жестко переключаем на плеер YouTube Music, где полностью отключен nsig
+        # Жестко активируем контур веб-встраивания, где полностью отключен nsig
         'extractor_args': {
             'youtube': {
-                'player_client': ['music'],
-                'skip': ['webpage', 'configs']
+                'player_client': ['web_embedded'],
+                'skip': ['webpage']
             }
         }
     }
