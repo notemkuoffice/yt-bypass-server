@@ -24,14 +24,15 @@ def get_direct_url(youtube_url: str):
         'nocheckcertificate': True,
         'verbose': True,
         'no_cookies_to_disk': True,
-        # Используем SmartTV и мобильный веб, работающие без ограничений сигнатур nsig
+        # ИСПРАВЛЕНО: переключаем на tvhtml5 для полного обхода nsig
         'extractor_args': {
             'youtube': {
-                'player_client': ['tv', 'mweb'],
+                'player_client': ['tvhtml5'],
                 'skip': ['webpage']
             }
         }
     }
+
     
     if os.path.exists(tmp_cookie_path):
         ydl_opts['cookiefile'] = tmp_cookie_path
