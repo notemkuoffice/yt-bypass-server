@@ -8,36 +8,25 @@ import yt_dlp
 app = FastAPI()
 
 def get_direct_url(youtube_url: str):
-    repo_cookie_file = "youtube_session.txt"
-    tmp_cookie_path = "/tmp/clean_cookies.txt"
-    
-    if os.path.exists(repo_cookie_file):
-        with open(repo_cookie_file, "r", encoding="utf-8") as rf:
-            content = rf.read()
-        clean_content = content.replace("\r\n", "\n")
-        with open(tmp_cookie_path, "w", encoding="utf-8", newline="\n") as wf:
-            wf.write(clean_content)
-    
+    # Для ТВ-клиента куки не требуются, так как SmartTV API отдает 'best' форматы без nsig
     ydl_opts = {
         'format': 'best',
         'nocheckcertificate': True,
         'verbose': True,
         'no_cookies_to_disk': True,
-        # Жестко активируем ТВ-клиент, у которого вырезано шифрование nsig
+        # Оставляем строго один SmartTV клиент
         'extractor_args': {
             'youtube': {
-                'player_client': ['tvhtml5', 'android'],
+                'player_client': ['tv'],
                 'skip': ['webpage']
             }
         }
     }
-    
-    if os.path.exists(tmp_cookie_path):
-        ydl_opts['cookiefile'] = tmp_cookie_path
         
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         info = ydl.extract_info(youtube_url, download=False)
         return info.get('url')
+
 
 @app.get("/api/stream")
 async def stream_video_api(url: str = Query(...)):
