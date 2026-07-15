@@ -11,7 +11,6 @@ def get_direct_url(youtube_url: str):
     repo_cookie_file = "youtube_session.txt"
     tmp_cookie_path = "/tmp/clean_cookies.txt"
     
-    # Восстанавливаем чтение и очистку кук в RAM
     if os.path.exists(repo_cookie_file):
         with open(repo_cookie_file, "r", encoding="utf-8") as rf:
             content = rf.read()
@@ -24,16 +23,15 @@ def get_direct_url(youtube_url: str):
         'nocheckcertificate': True,
         'verbose': True,
         'no_cookies_to_disk': True,
-        # Запускаем строго ТВ-клиент
+        # Жестко переключаем на плеер YouTube Music, где полностью отключен nsig
         'extractor_args': {
             'youtube': {
-                'player_client': ['tv'],
-                'skip': ['webpage']
+                'player_client': ['music'],
+                'skip': ['webpage', 'configs']
             }
         }
     }
     
-    # Принудительно скармливаем очищенные куки ТВ-клиенту
     if os.path.exists(tmp_cookie_path):
         ydl_opts['cookiefile'] = tmp_cookie_path
         
