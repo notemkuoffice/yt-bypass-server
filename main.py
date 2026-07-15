@@ -29,10 +29,11 @@ def get_direct_url(youtube_url: str):
     ydl_opts = {
         'format': 'b',
         'nocheckcertificate': True,
-        'quiet': True,
+        # ИСПРАВЛЕНО: Включаем максимальное логирование для Vercel
+        'verbose': True,
         'no_cookies_to_disk': True
     }
-    
+
     if os.path.exists(tmp_cookie_path):
         ydl_opts['cookiefile'] = tmp_cookie_path
 
