@@ -14,7 +14,6 @@ def get_direct_url(youtube_url: str):
     if os.path.exists(repo_cookie_file):
         with open(repo_cookie_file, "r", encoding="utf-8") as rf:
             content = rf.read()
-        # Очищаем от Windows-переносов \r\n, которые ломают парсер в Linux на Vercel
         clean_content = content.replace("\r\n", "\n")
         with open(tmp_cookie_path, "w", encoding="utf-8", newline="\n") as wf:
             wf.write(clean_content)
@@ -24,11 +23,11 @@ def get_direct_url(youtube_url: str):
         'nocheckcertificate': True,
         'verbose': True,
         'no_cookies_to_disk': True,
-        # Переключаем на чистый нативный клиент iOS приложения
+        # Жестко активируем ТВ-клиент, у которого вырезано шифрование nsig
         'extractor_args': {
             'youtube': {
-                'player_client': ['ios'],
-                'skip': ['webpage', 'configs']
+                'player_client': ['tvhtml5', 'android'],
+                'skip': ['webpage']
             }
         }
     }
