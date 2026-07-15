@@ -24,12 +24,11 @@ def get_direct_url(youtube_url: str):
         'nocheckcertificate': True,
         'verbose': True,
         'no_cookies_to_disk': True,
-        # Отключаем разбор DASH-манифестов, чтобы YouTube сразу отдавал цельные ссылки
-        'youtube_include_dash_manifest': False,
+        # Переключаем на чистый нативный клиент iOS приложения
         'extractor_args': {
             'youtube': {
-                'player_client': ['web'],
-                'skip': ['configs']
+                'player_client': ['ios'],
+                'skip': ['webpage', 'configs']
             }
         }
     }
