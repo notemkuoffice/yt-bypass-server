@@ -25,11 +25,11 @@ def get_direct_url(youtube_url: str):
         clean_content = content.replace("\r\n", "\n")
         with open(tmp_cookie_path, "w", encoding="utf-8", newline="\n") as wf:
             wf.write(clean_content)
-
+            
     ydl_opts = {
-        'format': 'b',
+        # ИСПРАВЛЕНО: переключаем на 'best', чтобы обойти ошибку шифрования nsig
+        'format': 'best',
         'nocheckcertificate': True,
-        # ИСПРАВЛЕНО: Включаем максимальное логирование для Vercel
         'verbose': True,
         'no_cookies_to_disk': True
     }
