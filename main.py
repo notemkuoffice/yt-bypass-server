@@ -24,15 +24,14 @@ def get_direct_url(youtube_url: str):
         'nocheckcertificate': True,
         'verbose': True,
         'no_cookies_to_disk': True,
-        # ИСПРАВЛЕНО: переключаем на tvhtml5 для полного обхода nsig
+        # ИСПРАВЛЕНО: используем сквозной эмбед-клиент, у которого отключен nsig
         'extractor_args': {
             'youtube': {
-                'player_client': ['tvhtml5'],
+                'player_client': ['web_embedded'],
                 'skip': ['webpage']
             }
         }
     }
-
     
     if os.path.exists(tmp_cookie_path):
         ydl_opts['cookiefile'] = tmp_cookie_path
